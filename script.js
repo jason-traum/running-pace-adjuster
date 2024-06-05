@@ -47,7 +47,7 @@ function calculatePaceAdjustment(goalPace, temp, humidity, wittleBaby) {
     // Apply adjustment (in seconds per mile)
     totalSeconds += totalSeconds * adjustment;
 
-    // Convert total seconds back to minutes and seconds
+    // Convert total seconds back to minutes and seconds :)
     minutes = Math.floor(totalSeconds / 60);
     seconds = Math.round(totalSeconds % 60);
 
