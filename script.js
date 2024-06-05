@@ -29,16 +29,41 @@ function getBaseAdjustment(temp, dewPoint) {
     return 0.1;
 }
 
-function calculatePaceAdjustment(goalPace, temp, humidity, wittleBaby) {
+function getUserAdjustments(sweatRate, acclimation, fitnessLevel) {
+    let adjustment = 0;
+    const adjustments = [];
+
+    // Sweat Rate adjustment
+    if (sweatRate > 1.5) adjustments.push(0.01);
+    else if (sweatRate > 1.0) adjustments.push(0.005);
+
+    // Heat Acclimation adjustment
+    if (acclimation === 'low') adjustments.push(0.01);
+    else if (acclimation === 'moderate') adjustments.push(0.005);
+
+    // Fitness Level adjustment
+    if (fitnessLevel === 'beginner') adjustments.push(0.01);
+    else if (fitnessLevel === 'intermediate') adjustments.push(0.005);
+
+    // Apply diminishing returns
+    adjustments.forEach((adj, index) => {
+        adjustment += adj / (index + 1);
+    });
+
+    return adjustment;
+}
+
+function calculatePaceAdjustment(goalPace, temp, humidity, sweatRate, acclimation, fitnessLevel) {
     const dewPoint = calculateDewPoint(temp, humidity);
     let adjustment = getBaseAdjustment(temp, dewPoint);
 
-    // Adjust for wittle baby factor: increase by 15% if selected
-    if (wittleBaby === 'yes') {
-        adjustment *= 1.15; // Adding a 15% increase if you're just a wittle baby 👶
-    }
+    // Get user-specific adjustments
+    const userAdjustment = getUserAdjustments(sweatRate, acclimation, fitnessLevel);
 
-    // Split goal pace into minutes and seconds
+    // Apply both adjustments
+    adjustment += userAdjustment;
+
+    // Convert goal pace to seconds
     const paceParts = goalPace.split(':');
     let minutes = parseInt(paceParts[0]);
     let seconds = parseInt(paceParts[1]);
@@ -59,12 +84,14 @@ async function calculateAdjustedPace() {
     const expectedTime = document.getElementById('expectedTime').value;
     const location = document.getElementById('location').value;
     const date = document.getElementById('date').value;
-    const wittleBaby = document.getElementById('wittleBaby').value;
+    const sweatRate = parseFloat(document.getElementById('sweatRate').value);
+    const acclimation = document.getElementById('acclimation').value;
+    const fitnessLevel = document.getElementById('fitnessLevel').value;
 
     try {
         const { temp, humidity, condition } = await fetchWeatherData(location, date);
         const dewPoint = calculateDewPoint(temp, humidity);
-        const adjustedPace = calculatePaceAdjustment(goalPace, temp, humidity, wittleBaby);
+        const adjustedPace = calculatePaceAdjustment(goalPace, temp, humidity, sweatRate, acclimation, fitnessLevel);
 
         document.getElementById('result').innerText = `Adjusted Pace: ${adjustedPace}`;
         document.getElementById('weather-info').innerHTML = `
