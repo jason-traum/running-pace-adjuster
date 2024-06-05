@@ -1,114 +1,108 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2487.6">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; -webkit-text-stroke: #000000}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; -webkit-text-stroke: #000000; min-height: 14.0px}
-    span.s1 {font-kerning: none}
-  </style>
+    <meta charset="UTF-8">
+    <title>Running Pace Adjuster</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f8ff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            text-align: center;
+        }
+        h1 {
+            font-size: 24px;
+            color: #333;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            color: #555;
+            text-align: left;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        #result, .weather-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            text-align: left;
+        }
+        .credits {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #555;
+        }
+        .credits a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .credits a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-<p class="p1"><span class="s1">&lt;!DOCTYPE html&gt;</span></p>
-<p class="p1"><span class="s1">&lt;html lang="en"&gt;</span></p>
-<p class="p1"><span class="s1">&lt;head&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;meta charset="UTF-8"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;title&gt;Running Pace Adjuster&lt;/title&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/head&gt;</span></p>
-<p class="p1"><span class="s1">&lt;body&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;h1&gt;Running Pace Adjuster&lt;/h1&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;form id="pace-form"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;label for="goalPace"&gt;Goal Pace (min/mile):&lt;/label&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;input type="text" id="goalPace" name="goalPace" required&gt;&lt;br&gt;&lt;br&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;label for="expectedTime"&gt;Expected Workout Time (HH:MM):&lt;/label&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;input type="text" id="expectedTime" name="expectedTime" required&gt;&lt;br&gt;&lt;br&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;label for="location"&gt;Location (City, Country):&lt;/label&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;input type="text" id="location" name="location" required&gt;&lt;br&gt;&lt;br&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;label for="gender"&gt;Gender:&lt;/label&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;select id="gender" name="gender" required&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;option value="male"&gt;Male&lt;/option&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;option value="female"&gt;Female&lt;/option&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/select&gt;&lt;br&gt;&lt;br&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;label for="bodyFat"&gt;Body Fat Percentage (%):&lt;/label&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;input type="text" id="bodyFat" name="bodyFat" required&gt;&lt;br&gt;&lt;br&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;button type="button" onclick="calculateAdjustedPace()"&gt;Calculate Adjusted Pace&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/form&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;p id="result"&gt;&lt;/p&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>async function fetchWeatherData(location) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${location}&amp;appid=YOUR_API_KEY&amp;units=imperial`);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const data = await response.json();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const temp = data.main.temp;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const humidity = data.main.humidity;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>return { temp, humidity };</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function calculateDewPoint(temp, humidity) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const a = 17.27;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const b = 237.7;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const alpha = ((a * temp) / (b + temp)) + Math.log(humidity / 100);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const dewPoint = (b * alpha) / (a - alpha);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>return dewPoint;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function getBaseAdjustment(temp, dewPoint) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const combined = temp + dewPoint;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (combined &lt;= 100) return 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (combined &lt;= 110) return 0.5;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (combined &lt;= 120) return 1.0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (combined &lt;= 130) return 2.0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (combined &lt;= 140) return 3.0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (combined &lt;= 150) return 4.5;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (combined &lt;= 160) return 6.0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (combined &lt;= 170) return 8.0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>return 10.0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function calculateAdjustedPace(goalPace, temp, humidity, gender, bodyFat) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const dewPoint = calculateDewPoint(temp, humidity);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let adjustment = getBaseAdjustment(temp, dewPoint);</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const genderFactor = gender === 'male' ? 1.0 : 0.9;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const baselineBodyFat = gender === 'male' ? 15 : 25;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const bodyFatAdjustment = ((bodyFat - baselineBodyFat) / 5) * 5;</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>adjustment = (adjustment * genderFactor) + bodyFatAdjustment;</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const paceParts = goalPace.split(':');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let minutes = parseInt(paceParts[0]);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let seconds = parseInt(paceParts[1]);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let totalSeconds = (minutes * 60) + seconds;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>totalSeconds += adjustment * 60;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>minutes = Math.floor(totalSeconds / 60);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>seconds = Math.round(totalSeconds % 60);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>return `${minutes}:${seconds &lt; 10 ? '0' + seconds : seconds}`;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>async function calculateAdjustedPace() {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const goalPace = document.getElementById('goalPace').value;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const expectedTime = document.getElementById('expectedTime').value;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const location = document.getElementById('location').value;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const gender = document.getElementById('gender').value;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const bodyFat = parseFloat(document.getElementById('bodyFat').value);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const { temp, humidity } = await fetchWeatherData(location);</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (isNaN(bodyFat)) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>document.getElementById('result').innerText = "Please enter valid numbers for body fat percentage.";</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>return;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const adjustedPace = calculateAdjustedPace(goalPace, temp, humidity, gender, bodyFat);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('result').innerText = `Adjusted Pace: ${adjustedPace}`;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/body&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/html&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
+    <div class="container">
+        <h1>Running Pace Adjuster</h1>
+        <form id="pace-form">
+            <label for="goalPace">Goal Pace (min/mile):</label>
+            <input type="text" id="goalPace" name="goalPace" value="08:30" required><br>
+            <label for="expectedTime">Expected Workout Time (HH:MM):</label>
+            <input type="text" id="expectedTime" name="expectedTime" value="07:00" required><br>
+            <label for="date">Date (YYYY-MM-DD):</label>
+            <input type="date" id="date" name="date" required><br>
+            <label for="location">Location (City, Country):</label>
+            <input type="text" id="location" name="location" value="New York, United States" required><br>
+            <label for="wittleBaby">Are you just a wittle baby?</label>
+            <select id="wittleBaby" name="wittleBaby" required>
+                <option value="no">No</option>
+                <option value="yes">Yes</option>
+            </select><br>
+            <button type="button" onclick="calculateAdjustedPace()">Calculate Adjusted Pace</button>
+        </form>
+        <div id="result"></div>
+        <div id="weather-info" class="weather-info"></div>
+        <div class="credits">
+            <p>Created by <a href="https://www.strava.com/athletes/113202952" target="_blank">Jason Traum</a></p>
+            <p>Source: <a href="http://maximumperformancerunning.blogspot.com/2013/07/temperature-dew-point.html" target="_blank">Maximum Performance Running</a></p>
+        </div>
+    </div>
+    <script src="script.js"></script>
+    <script>
+        // Set current date as default value
+        document.getElementById('date').value = new Date().toISOString().substring(0, 10);
+    </script>
 </body>
 </html>
