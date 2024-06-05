@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Heat Adjusted Pace</title>
+    <title> Heat Adjusted Pace </title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -95,23 +95,14 @@
             <input type="text" id="goalPace" name="goalPace" value="08:30" required><br>
             <label for="expectedTime">Time of Day (HH:MM):</label>
             <input type="text" id="expectedTime" name="expectedTime" value="07:00" required><br>
-            <label for="date">Date:</label>
+            <label for="date">Date (YYYY-MM-DD):</label>
             <input type="date" id="date" name="date" required><br>
             <label for="location">Location (City, Country):</label>
             <input type="text" id="location" name="location" value="New York, United States" required><br>
-            <label for="sweatRate">Sweat Rate (L/hr) (default: 1.2):</label>
-            <input type="number" id="sweatRate" name="sweatRate" value="1.2" step="0.1" required><br>
-            <label for="acclimation">Heat Acclimation (default: moderate):</label>
-            <select id="acclimation" name="acclimation" required>
-                <option value="high">Training in Hot Conditions (>3 times/week)</option>
-                <option value="moderate" selected>Occasional Hot Weather Training (<3 times/week)</option>
-                <option value="low">No Hot Weather Training</option>
-            </select><br>
-            <label for="fitnessLevel">Fitness Level (default: intermediate):</label>
-            <select id="fitnessLevel" name="fitnessLevel" required>
-                <option value="beginner">Beginner</option>
-                <option value="intermediate" selected>Intermediate</option>
-                <option value="advanced">Advanced</option>
+            <label for="wittleBaby">Are you just a wittle baby?</label>
+            <select id="wittleBaby" name="wittleBaby" required>
+                <option value="no">No</option>
+                <option value="yes">Yes</option>
             </select><br>
             <button type="button" onclick="calculateAdjustedPace()">Calculate Adjusted Pace</button>
         </form>
@@ -120,8 +111,8 @@
         <div class="explanation">
             <h2>Why Adjust Your Pace?</h2>
             <p>Adjust your pace so that your workout remains aerobically equivalent and safe, even in challenging weather conditions.</p>
-            <p>Adjusting your running pace based on weather conditions such as temperature and humidity is crucial for maintaining optimal performance and preventing overheating. The combination of high temperature and humidity can significantly increase the physiological stress on your body, making the same pace much harder to maintain.</p>
-            <p>This is just an estimate; conditions affect people differently.</p>
+            <p>Adjusting your running pace based on weather conditions such as temperature and humidity is crucial for maintaining optimal performance and preventing overheating. The combination of high temperature and humidity can significantly increase the physiological stress on your body, making the same pace much harder to maintain. </p>
+            <p></p>This is just an estimate, conditions affect people differently. </p>
         </div>
         <div class="credits">
             <p>Created by <a href="https://www.strava.com/athletes/113202952" target="_blank">J☀️ Traum</a></p>
@@ -149,6 +140,8 @@
                 themeIndex = 4;
             } else if (seconds % 7 === 0) {
                 themeIndex = 3;
+            } else if (seconds % 5 === 0) {
+                themeIndex = 2;
             } else if (seconds % 3 === 0) {
                 themeIndex = 1;
             } else {
