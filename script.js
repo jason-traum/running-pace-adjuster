@@ -33,9 +33,9 @@ function calculatePaceAdjustment(goalPace, temp, humidity, wittleBaby) {
     const dewPoint = calculateDewPoint(temp, humidity);
     let adjustment = getBaseAdjustment(temp, dewPoint);
 
-    // Adjust for "wittle baby" factor: increase by 10% if selected
+    // Adjust for wittle baby factor: increase by 15% if selected
     if (wittleBaby === 'yes') {
-        adjustment *= 1.1; // Adding a 10% increase for "wittle baby" selection
+        adjustment *= 1.15; // Adding a 15% increase if you're just a wittle baby 👶
     }
 
     // Split goal pace into minutes and seconds
