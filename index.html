@@ -31,7 +31,7 @@
         }
         h1 {
             font-size: 24px;
-            animation: slideDown 1s ease-in-out;
+            animation: slideDown 1.5s ease-in-out;
         }
         @keyframes slideDown {
             from { transform: translateY(-20px); opacity: 0; }
@@ -82,7 +82,7 @@
         .explanation {
             margin-top: 20px;
             font-size: 9.5px;
-            text-align: center;
+            text-align: left;
             color: #333;
         }
     </style>
@@ -135,7 +135,7 @@
             const seconds = now.getSeconds();
             let themeIndex;
 
-            if (seconds % 11 === 0) {
+            if (seconds % 5 === 0) {
                 themeIndex = 4;
             } else if (seconds % 7 === 0) {
                 themeIndex = 3;
