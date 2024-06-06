@@ -32,8 +32,8 @@ function getBaseAdjustment(temp, dewPoint) {
 }
 
 function calculateAcclimatizationScore(hoursPerWeek) {
-    if (hoursPerWeek >= 7) return 0.5; // High acclimatization
-    if (hoursPerWeek >= 4) return 0.75; // Moderate acclimatization
+    if (hoursPerWeek >= 14) return 0.5; // High acclimatization
+    if (hoursPerWeek >= 8) return 0.75; // Moderate acclimatization
     return 1; // Low acclimatization
 }
 
