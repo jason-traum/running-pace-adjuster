@@ -40,7 +40,7 @@ function calculateAcclimatizationScore(hoursPerWeek) {
 function applyWindAdjustment(adjustment, windSpeed, temp) {
     if (temp >= 80) {
         // Wind provides more relief in hotter conditions
-        if (windSpeed > 10) adjustment -= 0.015;
+        if (windSpeed > 10) adjustment -= 0.02;
         else if (windSpeed > 5) adjustment -= 0.01;
     } else if (temp >= 60) {
         // Wind provides some relief in moderate conditions
