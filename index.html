@@ -85,6 +85,12 @@
             text-align: left;
             color: #333;
         }
+        .methodology {
+            margin-top: 20px;
+            font-size: 9px;
+            text-align: left;
+            color: #333;
+        }
     </style>
 </head>
 <body onload="applyTheme()">
@@ -111,8 +117,22 @@
             <p>Adjusting your running pace based on weather conditions such as temperature and humidity is crucial for maintaining optimal performance and preventing overheating. The combination of high temperature and humidity can significantly increase the physiological stress on your body, making the same pace much harder to maintain.</p>
             <p>This is just an estimate; conditions affect people differently.</p>
         </div>
+        <div class="methodology">
+            <h2>Methodology and Calculations</h2>
+            <p>This tool adjusts your running pace based on several key factors to ensure you can maintain a safe and effective workout. Here's how the calculations are done:</p>
+            <ul>
+                <li><strong>Dew Point Calculation:</strong> The dew point is calculated using the temperature and humidity to determine the combined heat stress on your body.</li>
+                <li><strong>Base Adjustment:</strong> The base adjustment factor is determined from the combined temperature and dew point, reflecting how much these conditions typically slow you down.</li>
+                <li><strong>Acclimatization Score:</strong> Based on your average hours of running in the heat per week over the last 2 weeks, an acclimatization score is calculated. More hours indicate better adaptation and a lower adjustment factor.</li>
+                <li><strong>Wind Adjustment:</strong> Wind speed is factored in to adjust your pace, accounting for additional resistance or assistance from the wind.</li>
+                <li><strong>UV Index Adjustment:</strong> The UV index is used to account for the added stress of direct sunlight exposure.</li>
+                <li><strong>Interaction Effects:</strong> Adjustments are made to account for interactions between factors, such as the enhanced cooling effect of wind in hotter conditions and the compounding effects of high temperature and humidity.</li>
+            </ul>
+            <p>The overall adjustment is applied to your goal pace to give you an adjusted pace that maintains the same effort level under the current conditions.</p>
+        </div>
         <div class="credits">
             <p>Created by <a href="https://www.strava.com/athletes/113202952" target="_blank">J☀️ Traum</a></p>
+            <p>Source: <a href="http://maximumperformancerunning.blogspot.com/2013/07/temperature-dew-point.html" target="_blank">Maximum Performance Running</a></p>
         </div>
     </div>
     <script>
