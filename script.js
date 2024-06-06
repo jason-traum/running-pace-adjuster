@@ -127,7 +127,6 @@ async function calculateAdjustedPace() {
             <p>Humidity: ${humidity}%</p>
             <p>Condition: ${condition}</p>
             <p>Wind Speed: ${windSpeed} mph</p>
-            <p>UV Index: ${uvIndex}</p>
         `;
     } catch (error) {
         document.getElementById('result').innerText = `Error: ${error.message}`;
