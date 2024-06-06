@@ -13,7 +13,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             overflow: auto;
             background-color: #f5f5f5;
         }
@@ -127,7 +127,7 @@
                 <li><strong>Dew Point Calculation:</strong> The dew point is calculated using the temperature and humidity to determine the combined heat stress on your body.</li>
                 <li><strong>Base Adjustment:</strong> The base adjustment factor is determined from the combined temperature and dew point, reflecting how much these conditions typically slow you down.</li>
                 <li><strong>Acclimatization Score:</strong> Based on your average hours of running in the heat per week over the last 2 weeks, an acclimatization score is calculated. More hours indicate better adaptation and a lower adjustment factor.</li>
-                <li><strong>Wind Adjustment:</strong> Wind speed is factored in to adjust your pace, accounting for additional resistance or assistance from the wind.</li>
+                <li><strong>Wind Adjustment:</strong> Wind speed is factored in to adjust your pace, accounting for additional cooling from the wind.</li>
                 <li><strong>UV Index Adjustment:</strong> The UV index is used to account for the added stress of direct sunlight exposure.</li>
                 <li><strong>Interaction Effects:</strong> Adjustments are made to account for interactions between factors, such as the enhanced cooling effect of wind in hotter conditions and the compounding effects of high temperature and humidity.</li>
             </ul>
@@ -135,7 +135,13 @@
         </div>
         <div class="credits">
             <p>Created by <a href="https://www.strava.com/athletes/113202952" target="_blank">J☀️ Traum</a></p>
-            <p>Source: <a href="http://maximumperformancerunning.blogspot.com/2013/07/temperature-dew-point.html" target="_blank">Maximum Performance Running</a></p>
+            <p>Sources:</p>
+            <ul>
+                <li><a href="http://maximumperformancerunning.blogspot.com/2013/07/temperature-dew-point.html" target="_blank">Maximum Performance Running</a></li>
+                <li><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9237513/" target="_blank">Impact of environmental heat stress on physiology, performance, and recovery in endurance sports</a></li>
+                <li><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8677617/" target="_blank">Effect of heat acclimation on pacing strategy and performance in endurance runners</a></li>
+                <li><a href="https://link.springer.com/content/pdf/10.1007/s42978-024-00283-y.pdf" target="_blank">The influence of environmental temperature on marathon running performance</a></li>
+            </ul>
         </div>
     </div>
     <script>
@@ -157,19 +163,35 @@
 
             if (seconds % 5 === 0) {
                 themeIndex = 4;
-            } else if (seconds % 7 === 0) {
-                themeIndex = 3;
-            } else if (seconds % 3 === 0) {
-                themeIndex = 1;
-            } else {
-                themeIndex = 0;
-            }
+            } else if (seconds % 7=== 0) {
+themeIndex = 3;
+} else if (seconds % 3 === 0) {
+themeIndex = 1;
+} else {
+themeIndex = 0;
+}
 
-            const theme = themes[themeIndex];
-            document.body.style.backgroundColor = theme.bg;
-            document.body.style.color = theme.fg;
-            document.querySelector('.container').style.backgroundColor = 'white'; /* Always white */
-            document.querySelector('h1').style.color = theme.secondary;
-            document.querySelectorAll('label').forEach(label => label.style.color = theme.secondary);
-            document.querySelectorAll('input, select').forEach(input => input.style.backgroundColor = '#EDEDED');
-            document.query
+        const theme = themes[themeIndex];
+        document.body.style.backgroundColor = theme.bg;
+        document.body.style.color = theme.fg;
+        document.querySelector('.container').style.backgroundColor = 'white'; /* Always white */
+        document.querySelector('h1').style.color = theme.secondary;
+        document.querySelectorAll('label').forEach(label => label.style.color = theme.secondary);
+        document.querySelectorAll('input, select').forEach(input => input.style.backgroundColor = '#EDEDED');
+        document.querySelectorAll('button').forEach(button => {
+            button.style.backgroundColor = theme.button;
+            button.style.color = 'white';
+        });
+        document.querySelectorAll('#result, .weather-info').forEach(div => {
+            div.style.backgroundColor = '#e0f2f1';
+            div.style.color = theme.secondary;
+        });
+        document.querySelectorAll('.credits').forEach(credit => credit.style.color = theme.secondary);
+        document.querySelectorAll('.credits a').forEach(a => a.style.color = theme.button);
+    }
+</script>
+<script src="script.js"></script>
+
+</body>
+</html>
+```
