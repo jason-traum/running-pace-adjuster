@@ -37,9 +37,20 @@ function calculateAcclimatizationScore(hoursPerWeek) {
     return 1; // Low acclimatization
 }
 
-function applyWindAdjustment(adjustment, windSpeed) {
-    if (windSpeed > 10) adjustment += 0.01;
-    else if (windSpeed > 5) adjustment += 0.005;
+function applyWindAdjustment(adjustment, windSpeed, temp) {
+    if (temp >= 80) {
+        // Wind provides more relief in hotter conditions
+        if (windSpeed > 10) adjustment -= 0.015;
+        else if (windSpeed > 5) adjustment -= 0.01;
+    } else if (temp >= 60) {
+        // Wind provides some relief in moderate conditions
+        if (windSpeed > 10) adjustment -= 0.01;
+        else if (windSpeed > 5) adjustment -= 0.005;
+    } else {
+        // Wind has minimal effect in cooler conditions
+        if (windSpeed > 10) adjustment -= 0.005;
+        else if (windSpeed > 5) adjustment -= 0.0025;
+    }
     return adjustment;
 }
 
@@ -49,19 +60,36 @@ function applyUVAdjustment(adjustment, uvIndex) {
     return adjustment;
 }
 
+function applyInteractionEffects(adjustment, temp, humidity, uvIndex, acclimatizationScore) {
+    // Temperature and Humidity Interaction
+    if (temp > 80 && humidity > 60) adjustment += 0.01;
+    if (temp > 90 && humidity > 70) adjustment += 0.02;
+
+    // Temperature and UV Index Interaction
+    if (temp > 80 && uvIndex > 6) adjustment += 0.01;
+    if (temp > 90 && uvIndex > 8) adjustment += 0.02;
+
+    // Acclimatization Interaction
+    adjustment *= acclimatizationScore;
+
+    return adjustment;
+}
+
 function calculatePaceAdjustment(goalPace, temp, humidity, acclimatizationHours, windSpeed, uvIndex) {
     const dewPoint = calculateDewPoint(temp, humidity);
     let adjustment = getBaseAdjustment(temp, dewPoint);
 
-    // Apply acclimatization adjustment
+    // Calculate Acclimatization Score
     const acclimatizationScore = calculateAcclimatizationScore(acclimatizationHours);
-    adjustment *= acclimatizationScore;
 
-    // Apply wind adjustment
-    adjustment = applyWindAdjustment(adjustment, windSpeed);
+    // Apply Wind Adjustment
+    adjustment = applyWindAdjustment(adjustment, windSpeed, temp);
 
-    // Apply UV index adjustment
+    // Apply UV Index Adjustment
     adjustment = applyUVAdjustment(adjustment, uvIndex);
+
+    // Apply Interaction Effects
+    adjustment = applyInteractionEffects(adjustment, temp, humidity, uvIndex, acclimatizationScore);
 
     // Convert goal pace to seconds
     const paceParts = goalPace.split(':');
