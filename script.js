@@ -1,11 +1,13 @@
-async function fetchWeatherData(location, date) {
+async function fetchWeatherData(location, date, time) {
     const response = await fetch(`https://api.weatherapi.com/v1/forecast.json?key=2beb72048c714687af713040240506&q=${location}&dt=${date}`);
     const data = await response.json();
-    const forecast = data.forecast.forecastday[0].day;
-    const temp = forecast.avgtemp_f;
-    const humidity = forecast.avghumidity;
-    const condition = forecast.condition.text;
-    return { temp, humidity, condition };
+    const forecastHour = data.forecast.forecastday[0].hour.find(hour => hour.time.includes(time));
+    const temp = forecastHour.temp_f;
+    const humidity = forecastHour.humidity;
+    const condition = forecastHour.condition.text;
+    const windSpeed = forecastHour.wind_mph;
+    const uvIndex = forecastHour.uv;
+    return { temp, humidity, condition, windSpeed, uvIndex };
 }
 
 function calculateDewPoint(temp, humidity) {
@@ -29,16 +31,39 @@ function getBaseAdjustment(temp, dewPoint) {
     return 0.1;
 }
 
-function calculatePaceAdjustment(goalPace, temp, humidity, wittleBaby) {
+function calculateAcclimatizationScore(hoursPerWeek) {
+    if (hoursPerWeek >= 7) return 0.5; // High acclimatization
+    if (hoursPerWeek >= 4) return 0.75; // Moderate acclimatization
+    return 1; // Low acclimatization
+}
+
+function applyWindAdjustment(adjustment, windSpeed) {
+    if (windSpeed > 10) adjustment += 0.01;
+    else if (windSpeed > 5) adjustment += 0.005;
+    return adjustment;
+}
+
+function applyUVAdjustment(adjustment, uvIndex) {
+    if (uvIndex > 8) adjustment += 0.01;
+    else if (uvIndex > 6) adjustment += 0.005;
+    return adjustment;
+}
+
+function calculatePaceAdjustment(goalPace, temp, humidity, acclimatizationHours, windSpeed, uvIndex) {
     const dewPoint = calculateDewPoint(temp, humidity);
     let adjustment = getBaseAdjustment(temp, dewPoint);
 
-    // Adjust for wittle baby factor: increase by 15% if selected
-    if (wittleBaby === 'yes') {
-        adjustment *= 1.15; // Adding a 15% increase if you're just a wittle baby 👶
-    }
+    // Apply acclimatization adjustment
+    const acclimatizationScore = calculateAcclimatizationScore(acclimatizationHours);
+    adjustment *= acclimatizationScore;
 
-    // Split goal pace into minutes and seconds
+    // Apply wind adjustment
+    adjustment = applyWindAdjustment(adjustment, windSpeed);
+
+    // Apply UV index adjustment
+    adjustment = applyUVAdjustment(adjustment, uvIndex);
+
+    // Convert goal pace to seconds
     const paceParts = goalPace.split(':');
     let minutes = parseInt(paceParts[0]);
     let seconds = parseInt(paceParts[1]);
@@ -47,7 +72,7 @@ function calculatePaceAdjustment(goalPace, temp, humidity, wittleBaby) {
     // Apply adjustment (in seconds per mile)
     totalSeconds += totalSeconds * adjustment;
 
-    // Convert total seconds back to minutes and seconds :)
+    // Convert total seconds back to minutes and seconds
     minutes = Math.floor(totalSeconds / 60);
     seconds = Math.round(totalSeconds % 60);
 
@@ -59,12 +84,12 @@ async function calculateAdjustedPace() {
     const expectedTime = document.getElementById('expectedTime').value;
     const location = document.getElementById('location').value;
     const date = document.getElementById('date').value;
-    const wittleBaby = document.getElementById('wittleBaby').value;
+    const acclimatizationHours = parseFloat(document.getElementById('acclimatizationHours').value);
 
     try {
-        const { temp, humidity, condition } = await fetchWeatherData(location, date);
+        const { temp, humidity, condition, windSpeed, uvIndex } = await fetchWeatherData(location, date, expectedTime);
         const dewPoint = calculateDewPoint(temp, humidity);
-        const adjustedPace = calculatePaceAdjustment(goalPace, temp, humidity, wittleBaby);
+        const adjustedPace = calculatePaceAdjustment(goalPace, temp, humidity, acclimatizationHours, windSpeed, uvIndex);
 
         document.getElementById('result').innerText = `Adjusted Pace: ${adjustedPace}`;
         document.getElementById('weather-info').innerHTML = `
@@ -73,6 +98,8 @@ async function calculateAdjustedPace() {
             <p>Dew Point: ${dewPoint.toFixed(2)}°F</p>
             <p>Humidity: ${humidity}%</p>
             <p>Condition: ${condition}</p>
+            <p>Wind Speed: ${windSpeed} mph</p>
+            <p>UV Index: ${uvIndex}</p>
         `;
     } catch (error) {
         document.getElementById('result').innerText = `Error: ${error.message}`;
