@@ -1,7 +1,7 @@
 async function fetchHourlyWeatherData(zipCode) {
-    const response = await fetch(`https://api.weatherapi.com/v1/forecast.json?key=2beb72048c714687af713040240506&q=${zipCode}&days=3&hourly=1`);
+    const response = await fetch(`https://api.weatherapi.com/v1/forecast.json?key=2beb72048c714687af713040240506&q=${zipCode}&days=1&hour=1`);
     const data = await response.json();
-    return data.forecast.forecastday;
+    return data.forecast.forecastday[0].hour;
 }
 
 function calculateDewPoint(temp, humidity) {
@@ -85,7 +85,7 @@ function calculateWorkoutLengthAdjustment(length) {
 }
 
 function calculateHourlyAdjustments(goalPace, hourlyData, acclimatizationHours, hydrationStatus, workoutLength) {
-    const adjustments = hourlyData.map(hour => {
+    const adjustments = hourlyData.filter((_, index) => index % 2 === 0).map(hour => {
         const temp = hour.temp_f;
         const humidity = hour.humidity;
         const windSpeed = hour.wind_mph;
@@ -133,14 +133,14 @@ async function calculateHourlyPaces() {
 
     const hourlyData = await fetchHourlyWeatherData(zipCode);
 
-    const adjustments = calculateHourlyAdjustments(goalPace, hourlyData.flatMap(day => day.hour), acclimatizationHours, hydrationStatus, workoutLength);
+    const adjustments = calculateHourlyAdjustments(goalPace, hourlyData, acclimatizationHours, hydrationStatus, workoutLength);
 
     renderChart(adjustments);
 }
 
 function renderChart(data) {
     const ctx = document.getElementById('adjustmentChart').getContext('2d');
-    const labels = data.map(d => d.time);
+    const labels = data.map(d => new Date(d.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
     const adjustedPaces = data.map(d => parseFloat(d.adjustedPace.split(':').join('.'))); // Convert "min:sec" to decimal format for chart
 
     new Chart(ctx, {
@@ -161,12 +161,10 @@ function renderChart(data) {
                     type: 'time',
                     time: {
                         unit: 'hour',
-                        tooltipFormat: 'MMM DD, hA'
+                        tooltipFormat: 'HH:mm'
                     }
                 }
             }
         }
     });
 }
-
-document.getElementById('calculateButton').addEventListener('click', calculateHourlyPaces);
