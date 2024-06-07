@@ -168,3 +168,50 @@ function renderChart(data) {
         }
     });
 }
+
+// Set current date as default value
+document.getElementById('date').value = new Date().toISOString().substring(0, 10);
+
+function applyTheme() {
+    const themes = [
+        { bg: '#E0F7FA', fg: '#0B032D', button: '#D88C9A', secondary: '#0B032D' },
+        { bg: '#FFF8E1', fg: '#0B032D', button: '#0267C1', secondary: '#0B032D' },
+        { bg: '#FFCDD2', fg: '#0B032D', button: '#0267C1', secondary: '#0B032D' },
+        { bg: '#DCEDC8', fg: '#0B032D', button: '#0267C1', secondary: '#0B032D' },
+        { bg: '#F0F4C3', fg: '#0B032D', button: '#0267C1', secondary: '#0B032D' }
+    ];
+
+    const now = new Date();
+    const seconds = now.getSeconds();
+    let themeIndex;
+
+    if (seconds % 5 === 0) {
+        themeIndex = 4;
+    } else if (seconds % 7 === 0) {
+        themeIndex = 3;
+    } else if (seconds % 5 === 0) {
+        themeIndex = 2;
+    } else if (seconds % 3 === 0) {
+        themeIndex = 1;
+    } else {
+        themeIndex = 0;
+    }
+
+    const theme = themes[themeIndex];
+    document.body.style.backgroundColor = theme.bg;
+    document.body.style.color = theme.fg;
+    document.querySelector('.container').style.backgroundColor = 'white'; /* Always white */
+    document.querySelector('h1').style.color = theme.secondary;
+    document.querySelectorAll('label').forEach(label => label.style.color = theme.secondary);
+    document.querySelectorAll('input, select').forEach(input => input.style.backgroundColor = '#EDEDED');
+    document.querySelectorAll('button').forEach(button => {
+        button.style.backgroundColor = theme.button;
+        button.style.color = 'white';
+    });
+    document.querySelectorAll('#result, .weather-info').forEach(div => {
+        div.style.backgroundColor = '#e0f2f1';
+        div.style.color = theme.secondary;
+    });
+    document.querySelectorAll('.credits').forEach(credit => credit.style.color = theme.secondary);
+    document.querySelectorAll('.credits a').forEach(a => a.style.color = theme.button);
+}
