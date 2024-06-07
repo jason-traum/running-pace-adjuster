@@ -1,13 +1,7 @@
-async function fetchWeatherData(location, date, time) {
-    const response = await fetch(`https://api.weatherapi.com/v1/forecast.json?key=2beb72048c714687af713040240506&q=${location}&dt=${date}`);
+async function fetchHourlyWeatherData(zipCode) {
+    const response = await fetch(`https://api.weatherapi.com/v1/forecast.json?key=2beb72048c714687af713040240506&q=${zipCode}&days=3&hourly=1`);
     const data = await response.json();
-    const forecastHour = data.forecast.forecastday[0].hour.find(hour => hour.time.includes(time));
-    const temp = forecastHour.temp_f;
-    const humidity = forecastHour.humidity;
-    const condition = forecastHour.condition.text;
-    const windSpeed = forecastHour.wind_mph;
-    const uvIndex = forecastHour.uv;
-    return { temp, humidity, condition, windSpeed, uvIndex };
+    return data.forecast.forecastday;
 }
 
 function calculateDewPoint(temp, humidity) {
@@ -32,22 +26,19 @@ function getBaseAdjustment(temp, dewPoint) {
 }
 
 function calculateAcclimatizationScore(hoursPerWeek) {
-    if (hoursPerWeek >= 14) return 0.5; // High acclimatization
-    if (hoursPerWeek >= 8) return 0.75; // Moderate acclimatization
+    if (hoursPerWeek >= 7) return 0.5; // High acclimatization
+    if (hoursPerWeek >= 4) return 0.75; // Moderate acclimatization
     return 1; // Low acclimatization
 }
 
 function applyWindAdjustment(adjustment, windSpeed, temp) {
     if (temp >= 80) {
-        // Wind provides more relief in hotter conditions
         if (windSpeed > 10) adjustment -= 0.02;
         else if (windSpeed > 5) adjustment -= 0.01;
     } else if (temp >= 60) {
-        // Wind provides some relief in moderate conditions
         if (windSpeed > 10) adjustment -= 0.01;
         else if (windSpeed > 5) adjustment -= 0.005;
     } else {
-        // Wind has minimal effect in cooler conditions
         if (windSpeed > 10) adjustment -= 0.005;
         else if (windSpeed > 5) adjustment -= 0.0025;
     }
@@ -60,7 +51,7 @@ function applyUVAdjustment(adjustment, uvIndex) {
     return adjustment;
 }
 
-function applyInteractionEffects(adjustment, temp, humidity, uvIndex, acclimatizationScore) {
+function applyInteractionEffects(adjustment, temp, humidity, uvIndex, windSpeed, acclimatizationScore) {
     // Temperature and Humidity Interaction
     if (temp > 80 && humidity > 60) adjustment += 0.01;
     if (temp > 90 && humidity > 70) adjustment += 0.02;
@@ -69,66 +60,113 @@ function applyInteractionEffects(adjustment, temp, humidity, uvIndex, acclimatiz
     if (temp > 80 && uvIndex > 6) adjustment += 0.01;
     if (temp > 90 && uvIndex > 8) adjustment += 0.02;
 
+    // Wind and Temperature Interaction
+    if (temp > 80) {
+        if (windSpeed > 10) adjustment -= 0.02;
+        else if (windSpeed > 5) adjustment -= 0.01;
+    }
+
     // Acclimatization Interaction
     adjustment *= acclimatizationScore;
 
     return adjustment;
 }
 
-function calculatePaceAdjustment(goalPace, temp, humidity, acclimatizationHours, windSpeed, uvIndex) {
-    const dewPoint = calculateDewPoint(temp, humidity);
-    let adjustment = getBaseAdjustment(temp, dewPoint);
-
-    // Calculate Acclimatization Score
-    const acclimatizationScore = calculateAcclimatizationScore(acclimatizationHours);
-
-    // Apply Wind Adjustment
-    adjustment = applyWindAdjustment(adjustment, windSpeed, temp);
-
-    // Apply UV Index Adjustment
-    adjustment = applyUVAdjustment(adjustment, uvIndex);
-
-    // Apply Interaction Effects
-    adjustment = applyInteractionEffects(adjustment, temp, humidity, uvIndex, acclimatizationScore);
-
-    // Convert goal pace to seconds
-    const paceParts = goalPace.split(':');
-    let minutes = parseInt(paceParts[0]);
-    let seconds = parseInt(paceParts[1]);
-    let totalSeconds = (minutes * 60) + seconds;
-
-    // Apply adjustment (in seconds per mile)
-    totalSeconds += totalSeconds * adjustment;
-
-    // Convert total seconds back to minutes and seconds
-    minutes = Math.floor(totalSeconds / 60);
-    seconds = Math.round(totalSeconds % 60);
-
-    return `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+function calculateHydrationAdjustment(hydrationStatus) {
+    if (hydrationStatus === 'well') return 1;
+    if (hydrationStatus === 'moderate') return 1.05;
+    if (hydrationStatus === 'poor') return 1.1;
 }
 
-async function calculateAdjustedPace() {
-    const goalPace = document.getElementById('goalPace').value;
-    const expectedTime = document.getElementById('expectedTime').value;
-    const location = document.getElementById('location').value;
-    const date = document.getElementById('date').value;
-    const acclimatizationHours = parseFloat(document.getElementById('acclimatizationHours').value);
+function calculateWorkoutLengthAdjustment(length) {
+    if (length > 90) return 1.05;
+    if (length > 60) return 1.03;
+    return 1;
+}
 
-    try {
-        const { temp, humidity, condition, windSpeed, uvIndex } = await fetchWeatherData(location, date, expectedTime);
+function calculateHourlyAdjustments(goalPace, hourlyData, acclimatizationHours, hydrationStatus, workoutLength) {
+    const adjustments = hourlyData.map(hour => {
+        const temp = hour.temp_f;
+        const humidity = hour.humidity;
+        const windSpeed = hour.wind_mph;
+        const uvIndex = hour.uv;
+        const time = hour.time;
+
         const dewPoint = calculateDewPoint(temp, humidity);
-        const adjustedPace = calculatePaceAdjustment(goalPace, temp, humidity, acclimatizationHours, windSpeed, uvIndex);
+        let adjustment = getBaseAdjustment(temp, dewPoint);
 
-        document.getElementById('result').innerText = `Adjusted Pace: ${adjustedPace}`;
-        document.getElementById('weather-info').innerHTML = `
-            <p><strong>Weather Information:</strong></p>
-            <p>Temperature: ${temp}°F</p>
-            <p>Dew Point: ${dewPoint.toFixed(2)}°F</p>
-            <p>Humidity: ${humidity}%</p>
-            <p>Condition: ${condition}</p>
-            <p>Wind Speed: ${windSpeed} mph</p>
-        `;
-    } catch (error) {
-        document.getElementById('result').innerText = `Error: ${error.message}`;
-    }
+        const acclimatizationScore = calculateAcclimatizationScore(acclimatizationHours);
+
+        adjustment = applyWindAdjustment(adjustment, windSpeed, temp);
+        adjustment = applyUVAdjustment(adjustment, uvIndex);
+        adjustment = applyInteractionEffects(adjustment, temp, humidity, uvIndex, windSpeed, acclimatizationScore);
+
+        const hydrationAdjustment = calculateHydrationAdjustment(hydrationStatus);
+        const workoutLengthAdjustment = calculateWorkoutLengthAdjustment(workoutLength);
+
+        adjustment *= hydrationAdjustment * workoutLengthAdjustment;
+
+        const paceParts = goalPace.split(':');
+        let minutes = parseInt(paceParts[0]);
+        let seconds = parseInt(paceParts[1]);
+        let totalSeconds = (minutes * 60) + seconds;
+
+        totalSeconds += totalSeconds * adjustment;
+
+        minutes = Math.floor(totalSeconds / 60);
+        seconds = Math.round(totalSeconds % 60);
+
+        const adjustedPace = `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+
+        return { time, adjustedPace };
+    });
+
+    return adjustments;
 }
+
+async function calculateHourlyPaces() {
+    const goalPace = document.getElementById('goalPace').value;
+    const zipCode = document.getElementById('zipCode').value;
+    const acclimatizationHours = parseFloat(document.getElementById('acclimatizationHours').value);
+    const hydrationStatus = document.getElementById('hydrationStatus').value;
+    const workoutLength = parseInt(document.getElementById('workoutLength').value);
+
+    const hourlyData = await fetchHourlyWeatherData(zipCode);
+
+    const adjustments = calculateHourlyAdjustments(goalPace, hourlyData.flatMap(day => day.hour), acclimatizationHours, hydrationStatus, workoutLength);
+
+    renderChart(adjustments);
+}
+
+function renderChart(data) {
+    const ctx = document.getElementById('adjustmentChart').getContext('2d');
+    const labels = data.map(d => d.time);
+    const adjustedPaces = data.map(d => parseFloat(d.adjustedPace.split(':').join('.'))); // Convert "min:sec" to decimal format for chart
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Adjusted Pace (min/mile)',
+                data: adjustedPaces,
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                fill: false,
+            }]
+        },
+        options: {
+            scales: {
+                x: {
+                    type: 'time',
+                    time: {
+                        unit: 'hour',
+                        tooltipFormat: 'MMM DD, hA'
+                    }
+                }
+            }
+        }
+    });
+}
+
+document.getElementById('calculateButton').addEventListener('click', calculateHourlyPaces);
