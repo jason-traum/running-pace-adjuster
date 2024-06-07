@@ -143,7 +143,12 @@ function renderChart(data) {
     const labels = data.map(d => new Date(d.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
     const adjustedPaces = data.map(d => parseFloat(d.adjustedPace.split(':').join('.'))); // Convert "min:sec" to decimal format for chart
 
-    new Chart(ctx, {
+    // Destroy existing chart instance if it exists
+    if (window.adjustmentChart) {
+        window.adjustmentChart.destroy();
+    }
+
+    window.adjustmentChart = new Chart(ctx, {
         type: 'line',
         data: {
             labels: labels,
