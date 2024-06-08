@@ -202,21 +202,20 @@ function applyTheme() {
         themeIndex = 0;
     }
 
-    const theme = themes[themeIndex];
-    document.body.style.backgroundColor = theme.bg;
-    document.body.style.color = theme.fg;
-    document.querySelector('.container').style.backgroundColor = 'white'; /* Always white */
-    document.querySelector('h1').style.color = theme.secondary;
-    document.querySelectorAll('label').forEach(label => label.style.color = theme.secondary);
-    document.querySelectorAll('input, select').forEach(input => input.style.backgroundColor = '#EDEDED');
-    document.querySelectorAll('button').forEach(button => {
-        button.style.backgroundColor = theme.button;
-        button.style.color = 'white';
-    });
-    document.querySelectorAll('#result, .weather-info').forEach(div => {
-        div.style.backgroundColor = '#e0f2f1';
-        div.style.color = theme.secondary;
-    });
-    document.querySelectorAll('.credits').forEach(credit => credit.style.color = theme.secondary);
-    document.querySelectorAll('.credits a').forEach(a => a.style.color = theme.button);
+    const theme = themes[themeIndex];document.body.style.backgroundColor = theme.bg;
+document.body.style.color = theme.fg;
+document.querySelector('.container').style.backgroundColor = 'white'; /* Always white */
+document.querySelector('h1').style.color = theme.secondary;
+document.querySelectorAll('label').forEach(label => label.style.color = theme.secondary);
+document.querySelectorAll('input, select').forEach(input => input.style.backgroundColor = '#EDEDED');
+document.querySelectorAll('button').forEach(button => {
+    button.style.backgroundColor = theme.button;
+    button.style.color = 'white';
+});
+document.querySelectorAll('#result, .weather-info').forEach(div => {
+    div.style.backgroundColor = '#e0f2f1';
+    div.style.color = theme.secondary;
+});
+document.querySelectorAll('.credits').forEach(credit => credit.style.color = theme.secondary);
+document.querySelectorAll('.credits a').forEach(a => a.style.color = theme.button);
 }
