@@ -25,16 +25,16 @@ function calculatePaceAdjustment(goalPace, temp, humidity, hydrationLevel, accli
     const combined = temp + dewPoint;
 
     // Continuous function for temperature and dew point
-    const baseAdjustment = sigmoid((combined - 100) / 10) * 0.1;
+    const baseAdjustment = sigmoid((combined - 100) / 10) * 0.05; // Reduced impact
 
     // Adjust for hydration level (normalized between 0 and 1)
-    const hydrationAdjustment = sigmoid((hydrationLevel - 50) / 10) * 0.1;
+    const hydrationAdjustment = hydrationLevel > 50 ? -sigmoid((hydrationLevel - 50) / 10) * 0.02 : sigmoid((50 - hydrationLevel) / 10) * 0.02; // Reduced impact
 
     // Adjust for acclimatization (normalized between 0 and 1)
-    const acclimatizationAdjustment = sigmoid(acclimatization / 10) * 0.1;
+    const acclimatizationAdjustment = sigmoid(acclimatization / 10) * 0.02; // Reduced impact
 
     // Adjust for workout length (normalized by subtracting 60 and scaling)
-    const workoutLengthAdjustment = sigmoid((workoutLength - 60) / 10) * 0.1;
+    const workoutLengthAdjustment = sigmoid((workoutLength - 60) / 10) * 0.02; // Reduced impact
 
     let adjustment = baseAdjustment + hydrationAdjustment - acclimatizationAdjustment + workoutLengthAdjustment;
 
