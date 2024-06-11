@@ -29,9 +29,14 @@ function getBaseAdjustment(temp, dewPoint) {
     return 0.1;
 }
 
-function calculatePaceAdjustment(goalPace, temp, humidity) {
+function calculatePaceAdjustment(goalPace, temp, humidity, wittleBaby) {
     const dewPoint = calculateDewPoint(temp, humidity);
     let adjustment = getBaseAdjustment(temp, dewPoint);
+
+    // Adjust for wittle baby factor: increase by 15% if selected
+    if (wittleBaby === 'yes') {
+        adjustment *= 1.15; // Adding a 15% increase if you're just a wittle baby 👶
+    }
 
     // Split goal pace into minutes and seconds
     const paceParts = goalPace.split(':');
@@ -42,7 +47,7 @@ function calculatePaceAdjustment(goalPace, temp, humidity) {
     // Apply adjustment (in seconds per mile)
     totalSeconds += totalSeconds * adjustment;
 
-    // Convert total seconds back to minutes and seconds
+    // Convert total seconds back to minutes and seconds :)
     minutes = Math.floor(totalSeconds / 60);
     seconds = Math.round(totalSeconds % 60);
 
@@ -54,11 +59,12 @@ async function calculateAdjustedPace() {
     const expectedTime = document.getElementById('expectedTime').value;
     const location = document.getElementById('location').value;
     const date = document.getElementById('date').value;
+    const wittleBaby = document.getElementById('wittleBaby').value;
 
     try {
         const { temp, humidity, condition } = await fetchWeatherData(location, date);
         const dewPoint = calculateDewPoint(temp, humidity);
-        const adjustedPace = calculatePaceAdjustment(goalPace, temp, humidity);
+        const adjustedPace = calculatePaceAdjustment(goalPace, temp, humidity, wittleBaby);
 
         document.getElementById('result').innerText = `Adjusted Pace: ${adjustedPace}`;
         document.getElementById('weather-info').innerHTML = `
@@ -71,51 +77,4 @@ async function calculateAdjustedPace() {
     } catch (error) {
         document.getElementById('result').innerText = `Error: ${error.message}`;
     }
-}
-
-// Set current date as default value
-document.getElementById('date').value = new Date().toISOString().substring(0, 10);
-
-function applyTheme() {
-    const themes = [
-        { bg: '#E0F7FA', fg: '#0B032D', button: '#D88C9A', secondary: '#0B032D' },
-        { bg: '#FFF8E1', fg: '#0B032D', button: '#0267C1', secondary: '#0B032D' },
-        { bg: '#FFCDD2', fg: '#0B032D', button: '#0267C1', secondary: '#0B032D' },
-        { bg: '#DCEDC8', fg: '#0B032D', button: '#0267C1', secondary: '#0B032D' },
-        { bg: '#F0F4C3', fg: '#0B032D', button: '#0267C1', secondary: '#0B032D' }
-    ];
-
-    const now = new Date();
-    const seconds = now.getSeconds();
-    let themeIndex;
-
-    if (seconds % 5 === 0) {
-        themeIndex = 4;
-    } else if (seconds % 7 === 0) {
-        themeIndex = 3;
-    } else if (seconds % 5 === 0) {
-        themeIndex = 2;
-    } else if (seconds % 3 === 0) {
-        themeIndex = 1;
-    } else {
-        themeIndex = 0;
-    }
-
-    const theme = themes[themeIndex];
-    document.body.style.backgroundColor = theme.bg;
-    document.body.style.color = theme.fg;
-    document.querySelector('.container').style.backgroundColor = 'white'; /* Always white */
-    document.querySelector('h1').style.color = theme.secondary;
-    document.querySelectorAll('label').forEach(label => label.style.color = theme.secondary);
-    document.querySelectorAll('input, select').forEach(input => input.style.backgroundColor = '#EDEDED');
-    document.querySelectorAll('button').forEach(button => {
-        button.style.backgroundColor = theme.button;
-        button.style.color = 'white';
-    });
-    document.querySelectorAll('#result, .weather-info').forEach(div => {
-        div.style.backgroundColor = '#e0f2f1';
-        div.style.color = theme.secondary;
-    });
-    document.querySelectorAll('.credits').forEach(credit => credit.style.color = theme.secondary);
-    document.querySelectorAll('.credits a').forEach(a => a.style.color = theme.button);
 }
