@@ -28,7 +28,7 @@ function calculatePaceAdjustment(goalPace, temp, humidity, hydrationLevel, accli
     const baseAdjustment = sigmoid((combined - 100) / 10) * 0.05; // Reduced impact
 
     // Adjust for hydration level (normalized between 0 and 1)
-    const hydrationAdjustment = hydrationLevel > 50 ? -sigmoid((hydrationLevel - 50) / 10) * 0.02 : sigmoid((50 - hydrationLevel) / 10) * 0.02; // Reduced impact
+    const hydrationAdjustment = hydrationLevel > 50 ? -sigmoid((hydrationLevel - 50) / 10) * 0.01 : sigmoid((50 - hydrationLevel) / 10) * 0.01; // Reduced impact
 
     // Adjust for acclimatization (normalized between 0 and 1)
     const acclimatizationAdjustment = sigmoid(acclimatization / 10) * 0.02; // Reduced impact
