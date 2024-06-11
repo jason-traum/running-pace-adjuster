@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Heat Adjusted Pace </title>
+    <title>Heat Adjusted Pace</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -13,7 +13,9 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
+            overflow: auto;
+            background-color: #f5f5f5;
         }
         .container {
             padding: 20px;
@@ -24,6 +26,7 @@
             text-align: center;
             background-color: white; /* Always keep the main box white */
             animation: fadeIn 1s ease-in-out;
+            margin: 20px 0;
         }
         @keyframes fadeIn {
             from { opacity: 0; }
@@ -72,6 +75,7 @@
         .credits {
             margin-top: 20px;
             font-size: 8px;
+            text-align: left;
         }
         .credits a {
             text-decoration: none;
@@ -85,35 +89,109 @@
             text-align: left;
             color: #333;
         }
+        .methodology {
+            margin-top: 20px;
+            font-size: 9px;
+            text-align: left;
+            color: #333;
+        }
     </style>
 </head>
 <body onload="applyTheme()">
     <div class="container">
         <h1>🏃‍♂️ Heat Adjusted Pace 🥵</h1>
         <form id="pace-form">
-            <label for="goalPace">Goal Pace in Ideal Conditions (min/mile):</label>
+            <label for="goalPace">Target Pace Assuming Ideal Conditions (min/mile):</label>
             <input type="text" id="goalPace" name="goalPace" value="08:30" required><br>
             <label for="expectedTime">Time of Day (HH:MM):</label>
             <input type="text" id="expectedTime" name="expectedTime" value="07:00" required><br>
-            <label for="date">Date (YYYY-MM-DD):</label>
+            <label for="date">Date:</label>
             <input type="date" id="date" name="date" required><br>
             <label for="location">Location (City, Country):</label>
             <input type="text" id="location" name="location" value="New York, United States" required><br>
-            <button type="button" id="calculateButton" onclick="calculateAdjustedPace()">Calculate Adjusted Pace</button>
+            <label for="acclimatizationHours">Hours Running in Heat in Last Two Weeks:</label>
+            <input type="number" id="acclimatizationHours" name="acclimatizationHours" value="0" step=".5" required><br>
+            <button type="button" onclick="calculateAdjustedPace()">Calculate Adjusted Pace</button>
         </form>
         <div id="result"></div>
         <div id="weather-info" class="weather-info"></div>
         <div class="explanation">
             <h2>Why Adjust Your Pace?</h2>
             <p>Adjust your pace so that your workout remains aerobically equivalent and safe, even in challenging weather conditions.</p>
-            <p>Adjusting your running pace based on weather conditions such as temperature and humidity is crucial for maintaining optimal performance and preventing overheating. The combination of high temperature and humidity can significantly increase the physiological stress on your body, making the same pace much harder to maintain. </p>
-            <p>This is just an estimate, conditions affect people differently. </p>
+            <p>Adjusting your running pace based on weather conditions such as temperature and humidity is crucial for maintaining optimal performance and preventing overheating. The combination of high temperature and humidity can significantly increase the physiological stress on your body, making the same pace much harder to maintain.</p>
+            <p>This is just an estimate; conditions affect people differently.</p>
+        </div>
+        <div class="methodology">
+            <h2>Methodology and Calculations</h2>
+            <p>This tool adjusts your running pace based on several key factors to ensure you can maintain a safe and effective workout. Here's how the calculations are done:</p>
+            <ul>
+                <li><strong>Dew Point Calculation:</strong> The dew point is calculated using the temperature and humidity to determine the combined heat stress on your body.</li>
+                <li><strong>Base Adjustment:</strong> The base adjustment factor is determined from the combined temperature and dew point, reflecting how much these conditions typically slow you down.</li>
+                <li><strong>Acclimatization Score:</strong> Based on your average hours of running in the heat per week over the last 2 weeks, an acclimatization score is calculated. More hours indicate better adaptation and a lower adjustment factor.</li>
+                <li><strong>Wind Adjustment:</strong> Wind speed is factored in to adjust your pace, accounting for additional cooling from the wind.</li>
+                <li><strong>Solar Radiation Adjustment:</strong> Direct sunlight increases percieved temperature and physiological stress.</li>
+                <li><strong>Interaction Effects:</strong> Adjustments are made to account for interactions between factors, such as the enhanced cooling effect of wind in hotter conditions and the compounding effects of high temperature and humidity.</li>
+            </ul>
+            <p>The overall adjustment is applied to your goal pace to give you an adjusted pace that maintains the same effort level under the current conditions.</p>
         </div>
         <div class="credits">
             <p>Created by <a href="https://www.strava.com/athletes/113202952" target="_blank">J☀️ Traum</a></p>
-            <p>Source: <a href="http://maximumperformancerunning.blogspot.com/2013/07/temperature-dew-point.html" target="_blank">Maximum Performance Running</a></p>
+            <p>Sources:</p>
+            <ul>
+                <li><a href="http://maximumperformancerunning.blogspot.com/2013/07/temperature-dew-point.html" target="_blank">Maximum Performance Running</a></li>
+                <li><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9237513/" target="_blank">Impact of environmental heat stress on physiology, performance, and recovery in endurance sports</a></li>
+                <li><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8677617/" target="_blank">Effect of heat acclimation on pacing strategy and performance in endurance runners</a></li>
+                <li><a href="https://link.springer.com/content/pdf/10.1007/s42978-024-00283-y.pdf" target="_blank">The influence of environmental temperature on marathon running performance</a></li>
+            </ul>
         </div>
     </div>
-    <script src="script.js"></script>
+    <script>
+        // Set current date as default value
+        document.getElementById('date').value = new Date().toISOString().substring(0, 10);
+
+        function applyTheme() {
+            const themes = [
+                { bg: '#E0F7FA', fg: '#0B032D', button: '#D88C9A', secondary: '#0B032D' },
+                { bg: '#FFF8E1', fg: '#0B032D', button: '#0267C1', secondary: '#0B032D' },
+                { bg: '#FFCDD2', fg: '#0B032D', button: '#0267C1', secondary: '#0B032D' },
+                { bg: '#DCEDC8', fg: '#0B032D', button: '#0267C1', secondary: '#0B032D' },
+                { bg: '#F0F4C3', fg: '#0B032D', button: '#0267C1', secondary: '#0B032D' }
+            ];
+
+            const now = new Date();
+            const seconds = now.getSeconds();
+            let themeIndex;
+
+            if (seconds % 5 === 0) {
+                themeIndex = 4;
+            } else if (seconds % 7=== 0) {
+themeIndex = 3;
+} else if (seconds % 3 === 0) {
+themeIndex = 1;
+} else {
+themeIndex = 0;
+}
+
+        const theme = themes[themeIndex];
+        document.body.style.backgroundColor = theme.bg;
+        document.body.style.color = theme.fg;
+        document.querySelector('.container').style.backgroundColor = 'white'; /* Always white */
+        document.querySelector('h1').style.color = theme.secondary;
+        document.querySelectorAll('label').forEach(label => label.style.color = theme.secondary);
+        document.querySelectorAll('input, select').forEach(input => input.style.backgroundColor = '#EDEDED');
+        document.querySelectorAll('button').forEach(button => {
+            button.style.backgroundColor = theme.button;
+            button.style.color = 'white';
+        });
+        document.querySelectorAll('#result, .weather-info').forEach(div => {
+            div.style.backgroundColor = '#e0f2f1';
+            div.style.color = theme.secondary;
+        });
+        document.querySelectorAll('.credits').forEach(credit => credit.style.color = theme.secondary);
+        document.querySelectorAll('.credits a').forEach(a => a.style.color = theme.button);
+    }
+</script>
+<script src="script.js"></script>
+
 </body>
 </html>
