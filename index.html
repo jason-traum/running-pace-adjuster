@@ -85,6 +85,10 @@
             text-align: left;
             color: #333;
         }
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+        }
     </style>
 </head>
 <body onload="applyTheme()">
@@ -100,14 +104,15 @@
             <label for="location">Location (City, Country):</label>
             <input type="text" id="location" name="location" value="New York, United States" required><br>
             <label for="hydrationStatus">Hydration Status:</label>
-            <select id="hydrationStatus" name="hydrationStatus" required>
-                <option value="well">Well Hydrated</option>
-                <option value="dehydrated">Dehydrated</option>
-            </select><br>
+            <div class="slider-label">
+                <span>Dehydrated</span>
+                <input type="range" id="hydrationStatus" name="hydrationStatus" min="0" max="100" value="50">
+                <span>Very Hydrated</span>
+            </div>
             <label for="acclimatization">Hours Run in Heat (Last 2 Weeks):</label>
             <input type="number" id="acclimatization" name="acclimatization" value="0" required><br>
-            <label for="workoutLength">Length of Workout (minutes):</label>
-            <input type="number" id="workoutLength" name="workoutLength" value="60" required><br>
+            <label for="workoutLength">Length of Workout (minutes, increments of 5):</label>
+            <input type="number" id="workoutLength" name="workoutLength" value="60" step="5" required><br>
             <button type="button" onclick="calculateAdjustedPace()">Calculate Adjusted Pace</button>
         </form>
         <div id="result"></div>
