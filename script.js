@@ -36,12 +36,20 @@ function calculatePaceAdjustment(goalPace, temp, humidity, hydrationLevel, accli
     // Adjust for workout length (normalized by subtracting 60 and scaling)
     const workoutLengthAdjustment = sigmoid((workoutLength - 60) / 10) * 0.02; // Reduced impact
 
-    let adjustment = baseAdjustment + hydrationAdjustment - acclimatizationAdjustment + workoutLengthAdjustment;
+    // Interaction effects
+    const tempFactor = (temp - 60) / 40;
+    const humidityFactor = humidity / 100;
+
+    const adjustedAcclimatization = acclimatizationAdjustment * (1 + tempFactor);
+    const adjustedHydration = hydrationAdjustment * (1 + tempFactor + humidityFactor);
+    const adjustedWorkoutLength = workoutLengthAdjustment * (1 + tempFactor);
+
+    let adjustment = baseAdjustment + adjustedHydration - adjustedAcclimatization + adjustedWorkoutLength;
 
     console.log(`Base Adjustment: ${baseAdjustment}`);
-    console.log(`Hydration Adjustment: ${hydrationAdjustment}`);
-    console.log(`Acclimatization Adjustment: ${acclimatizationAdjustment}`);
-    console.log(`Workout Length Adjustment: ${workoutLengthAdjustment}`);
+    console.log(`Hydration Adjustment: ${adjustedHydration}`);
+    console.log(`Acclimatization Adjustment: ${adjustedAcclimatization}`);
+    console.log(`Workout Length Adjustment: ${adjustedWorkoutLength}`);
     console.log(`Total Adjustment: ${adjustment}`);
 
     // Split goal pace into minutes and seconds
@@ -57,7 +65,16 @@ function calculatePaceAdjustment(goalPace, temp, humidity, hydrationLevel, accli
     minutes = Math.floor(totalSeconds / 60);
     seconds = Math.round(totalSeconds % 60);
 
-    return `${minutes}:${seconds < 10 ? "0" + seconds : seconds}`;
+    return {
+        adjustedPace: `${minutes}:${seconds < 10 ? "0" + seconds : seconds}`,
+        details: {
+            baseAdjustment,
+            adjustedHydration,
+            adjustedAcclimatization,
+            adjustedWorkoutLength,
+            totalAdjustment: adjustment
+        }
+    };
 }
 
 async function calculateAdjustedPace() {
@@ -72,7 +89,7 @@ async function calculateAdjustedPace() {
     try {
         const { temp, humidity, condition } = await fetchWeatherData(location, date);
         const dewPoint = calculateDewPoint(temp, humidity);
-        const adjustedPace = calculatePaceAdjustment(goalPace, temp, humidity, hydrationLevel, acclimatization, workoutLength);
+        const { adjustedPace, details } = calculatePaceAdjustment(goalPace, temp, humidity, hydrationLevel, acclimatization, workoutLength);
 
         document.getElementById("result").innerText = `Adjusted Pace: ${adjustedPace}`;
         document.getElementById("weather-info").innerHTML = `
@@ -82,8 +99,21 @@ async function calculateAdjustedPace() {
             <p>Humidity: ${humidity}%</p>
             <p>Condition: ${condition}</p>
         `;
+        document.getElementById("adjustment-details").innerHTML = `
+            <p><strong>Adjustment Details:</strong></p>
+            <p>Base Adjustment: ${(details.baseAdjustment * 100).toFixed(2)}%</p>
+            <p>Hydration Adjustment: ${(details.adjustedHydration * 100).toFixed(2)}%</p>
+            <p>Acclimatization Adjustment: ${(details.adjustedAcclimatization * 100).toFixed(2)}%</p>
+            <p>Workout Length Adjustment: ${(details.adjustedWorkoutLength * 100).toFixed(2)}%</p>
+            <p>Total Adjustment: ${(details.totalAdjustment * 100).toFixed(2)}%</p>
+        `;
+        // Show the results and details
+        document.getElementById("result").style.display = 'block';
+        document.getElementById("weather-info").style.display = 'block';
+        document.getElementById("adjustment-details").style.display = 'block';
     } catch (error) {
         document.getElementById("result").innerText = `Error: ${error.message}`;
+        document.getElementById("result").style.display = 'block';
     }
 }
 
