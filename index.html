@@ -91,7 +91,7 @@
     <div class="container">
         <h1>🏃‍♂️ Heat Adjusted Pace 🥵</h1>
         <form id="pace-form">
-            <label for="goalPace">Workout Pace (min/mile):</label>
+            <label for="goalPace">Workout Pace in Ideal Conditions (min/mile):</label>
             <input type="text" id="goalPace" name="goalPace" value="08:30" required><br>
             <label for="expectedTime">Time of Day (HH:MM):</label>
             <input type="text" id="expectedTime" name="expectedTime" value="07:00" required><br>
@@ -104,8 +104,10 @@
                 <option value="well">Well Hydrated</option>
                 <option value="dehydrated">Dehydrated</option>
             </select><br>
-            <label for="acclimatization">Average Hours Running in Heat/Week (Last 2 Weeks):</label>
+            <label for="acclimatization">Hours Run in Heat (Last 2 Weeks):</label>
             <input type="number" id="acclimatization" name="acclimatization" value="0" required><br>
+            <label for="workoutLength">Length of Workout (minutes):</label>
+            <input type="number" id="workoutLength" name="workoutLength" value="60" required><br>
             <button type="button" onclick="calculateAdjustedPace()">Calculate Adjusted Pace</button>
         </form>
         <div id="result"></div>
