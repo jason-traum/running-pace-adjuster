@@ -1,7 +1,11 @@
-async function fetchHourlyWeatherData(location) {
-    const response = await fetch(`https://api.weatherapi.com/v1/forecast.json?key=2beb72048c714687af713040240506&q=${location}&days=1&hour=1`);
+async function fetchWeatherData(location, date) {
+    const response = await fetch(`https://api.weatherapi.com/v1/forecast.json?key=2beb72048c714687af713040240506&q=${location}&dt=${date}`);
     const data = await response.json();
-    return data.forecast.forecastday[0].hour;
+    const forecast = data.forecast.forecastday[0].day;
+    const temp = forecast.avgtemp_f;
+    const humidity = forecast.avghumidity;
+    const condition = forecast.condition.text;
+    return { temp, humidity, condition };
 }
 
 function calculateDewPoint(temp, humidity) {
@@ -25,152 +29,48 @@ function getBaseAdjustment(temp, dewPoint) {
     return 0.1;
 }
 
-function calculateAcclimatizationScore(hoursPerWeek) {
-    if (hoursPerWeek >= 7) return 0.5; 
-    if (hoursPerWeek >= 4) return 0.75;
-    return 1; 
+function calculatePaceAdjustment(goalPace, temp, humidity) {
+    const dewPoint = calculateDewPoint(temp, humidity);
+    let adjustment = getBaseAdjustment(temp, dewPoint);
+
+    // Split goal pace into minutes and seconds
+    const paceParts = goalPace.split(':');
+    let minutes = parseInt(paceParts[0]);
+    let seconds = parseInt(paceParts[1]);
+    let totalSeconds = (minutes * 60) + seconds;
+
+    // Apply adjustment (in seconds per mile)
+    totalSeconds += totalSeconds * adjustment;
+
+    // Convert total seconds back to minutes and seconds
+    minutes = Math.floor(totalSeconds / 60);
+    seconds = Math.round(totalSeconds % 60);
+
+    return `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
 }
 
-function applyWindAdjustment(adjustment, windSpeed, temp) {
-    if (temp >= 80) {
-        if (windSpeed > 10) adjustment -= 0.02;
-        else if (windSpeed > 5) adjustment -= 0.01;
-    } else if (temp >= 60) {
-        if (windSpeed > 10) adjustment -= 0.01;
-        else if (windSpeed > 5) adjustment -= 0.005;
-    } else {
-        if (windSpeed > 10) adjustment -= 0.005;
-        else if (windSpeed > 5) adjustment -= 0.0025;
-    }
-    return adjustment;
-}
-
-function applyUVAdjustment(adjustment, uvIndex) {
-    if (uvIndex > 8) adjustment += 0.01;
-    else if (uvIndex > 6) adjustment += 0.005;
-    return adjustment;
-}
-
-function applyInteractionEffects(adjustment, temp, humidity, uvIndex, windSpeed, acclimatizationScore) {
-    // Temperature and Humidity Interaction
-    if (temp > 80 && humidity > 60) adjustment += 0.01;
-    if (temp > 90 && humidity > 70) adjustment += 0.02;
-
-    // Temperature and UV Index Interaction
-    if (temp > 80 && uvIndex > 6) adjustment += 0.01;
-    if (temp > 90 && uvIndex > 8) adjustment += 0.02;
-
-    // Wind and Temperature Interaction
-    if (temp > 80) {
-        if (windSpeed > 10) adjustment -= 0.02;
-        else if (windSpeed > 5) adjustment -= 0.01;
-    }
-
-    // Acclimatization Interaction
-    adjustment *= acclimatizationScore;
-
-    return adjustment;
-}
-
-function calculateHydrationAdjustment(hydrationStatus) {
-    if (hydrationStatus === 'well') return 1;
-    if (hydrationStatus === 'moderate') return 1.05;
-    if (hydrationStatus === 'poor') return 1.1;
-}
-
-function calculateWorkoutLengthAdjustment(length) {
-    if (length > 90) return 1.05;
-    if (length > 60) return 1.03;
-    return 1;
-}
-
-function calculateHourlyAdjustments(goalPace, hourlyData, acclimatizationHours, hydrationStatus, workoutLength) {
-    const adjustments = hourlyData.filter((_, index) => index % 2 === 0).map(hour => {
-        const temp = hour.temp_f;
-        const humidity = hour.humidity;
-        const windSpeed = hour.wind_mph;
-        const uvIndex = hour.uv;
-        const time = hour.time;
-
-        const dewPoint = calculateDewPoint(temp, humidity);
-        let adjustment = getBaseAdjustment(temp, dewPoint);
-
-        const acclimatizationScore = calculateAcclimatizationScore(acclimatizationHours);
-
-        adjustment = applyWindAdjustment(adjustment, windSpeed, temp);
-        adjustment = applyUVAdjustment(adjustment, uvIndex);
-        adjustment = applyInteractionEffects(adjustment, temp, humidity, uvIndex, windSpeed, acclimatizationScore);
-
-        const hydrationAdjustment = calculateHydrationAdjustment(hydrationStatus);
-        const workoutLengthAdjustment = calculateWorkoutLengthAdjustment(workoutLength);
-
-        adjustment *= hydrationAdjustment * workoutLengthAdjustment;
-
-        const paceParts = goalPace.split(':');
-        let minutes = parseInt(paceParts[0]);
-        let seconds = parseInt(paceParts[1]);
-        let totalSeconds = (minutes * 60) + seconds;
-
-        totalSeconds += totalSeconds * adjustment;
-
-        minutes = Math.floor(totalSeconds / 60);
-        seconds = Math.round(totalSeconds % 60);
-
-        const adjustedPace = `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
-
-        return { time, adjustedPace };
-    });
-
-    return adjustments;
-}
-
-async function calculateHourlyPaces() {
+async function calculateAdjustedPace() {
     const goalPace = document.getElementById('goalPace').value;
+    const expectedTime = document.getElementById('expectedTime').value;
     const location = document.getElementById('location').value;
-    const acclimatizationHours = parseFloat(document.getElementById('acclimatizationHours').value);
-    const hydrationStatus = document.getElementById('hydrationStatus').value;
-    const workoutLength = parseInt(document.getElementById('workoutLength').value);
+    const date = document.getElementById('date').value;
 
-    const hourlyData = await fetchHourlyWeatherData(location);
+    try {
+        const { temp, humidity, condition } = await fetchWeatherData(location, date);
+        const dewPoint = calculateDewPoint(temp, humidity);
+        const adjustedPace = calculatePaceAdjustment(goalPace, temp, humidity);
 
-    const adjustments = calculateHourlyAdjustments(goalPace, hourlyData, acclimatizationHours, hydrationStatus, workoutLength);
-
-    renderChart(adjustments);
-}
-
-function renderChart(data) {
-    const ctx = document.getElementById('adjustmentChart').getContext('2d');
-    const labels = data.map(d => new Date(d.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-    const adjustedPaces = data.map(d => parseFloat(d.adjustedPace.split(':').join('.'))); 
-
-    if (window.adjustmentChart) {
-        window.adjustmentChart.destroy();
+        document.getElementById('result').innerText = `Adjusted Pace: ${adjustedPace}`;
+        document.getElementById('weather-info').innerHTML = `
+            <p><strong>Weather Information:</strong></p>
+            <p>Temperature: ${temp}°F</p>
+            <p>Dew Point: ${dewPoint.toFixed(2)}°F</p>
+            <p>Humidity: ${humidity}%</p>
+            <p>Condition: ${condition}</p>
+        `;
+    } catch (error) {
+        document.getElementById('result').innerText = `Error: ${error.message}`;
     }
-
-    window.adjustmentChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Adjusted Pace (min/mile)',
-                data: adjustedPaces,
-                borderColor: 'rgba(75, 192, 192, 1)',
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                fill: false,
-            }]
-        },
-        options: {
-            scales: {
-                x: {
-                    type: 'time',
-                    time: {
-                        unit: 'hour',
-                        tooltipFormat: 'HH:mm'
-                    }
-                }
-            }
-        }
-    });
 }
 
 // Set current date as default value
@@ -204,7 +104,7 @@ function applyTheme() {
     const theme = themes[themeIndex];
     document.body.style.backgroundColor = theme.bg;
     document.body.style.color = theme.fg;
-    document.querySelector('.container').style.backgroundColor = 'white';
+    document.querySelector('.container').style.backgroundColor = 'white'; /* Always white */
     document.querySelector('h1').style.color = theme.secondary;
     document.querySelectorAll('label').forEach(label => label.style.color = theme.secondary);
     document.querySelectorAll('input, select').forEach(input => input.style.backgroundColor = '#EDEDED');
