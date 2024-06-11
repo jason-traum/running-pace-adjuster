@@ -18,7 +18,7 @@ function calculateDewPoint(temp, humidity) {
 
 function getBaseAdjustment(temp, dewPoint) {
     const combined = temp + dewPoint;
-    if (combined <= 100)return 0;
+    if (combined <= 100) return 0;
     if (combined <= 110) return 0.005;
     if (combined <= 120) return 0.01;
     if (combined <= 130) return 0.02;
@@ -29,13 +29,18 @@ function getBaseAdjustment(temp, dewPoint) {
     return 0.1;
 }
 
-function calculatePaceAdjustment(goalPace, temp, humidity, hydrationStatus) {
+function calculatePaceAdjustment(goalPace, temp, humidity, hydrationStatus, acclimatization) {
     const dewPoint = calculateDewPoint(temp, humidity);
     let adjustment = getBaseAdjustment(temp, dewPoint);
 
     // Adjust for hydration status: increase adjustment if dehydrated
     if (hydrationStatus === 'dehydrated') {
         adjustment *= 1.10; // Adding a 10% increase if dehydrated
+    }
+
+    // Adjust for acclimatization: reduce adjustment based on acclimatization level
+    if (acclimatization > 0) {
+        adjustment *= 1 - (acclimatization * 0.01); // Reduce adjustment by 1% per hour of acclimatization
     }
 
     // Split goal pace into minutes and seconds
@@ -60,11 +65,12 @@ async function calculateAdjustedPace() {
     const location = document.getElementById('location').value;
     const date = document.getElementById('date').value;
     const hydrationStatus = document.getElementById('hydrationStatus').value;
+    const acclimatization = parseInt(document.getElementById('acclimatization').value);
 
     try {
         const { temp, humidity, condition } = await fetchWeatherData(location, date);
         const dewPoint = calculateDewPoint(temp, humidity);
-        const adjustedPace = calculatePaceAdjustment(goalPace, temp, humidity, hydrationStatus);
+        const adjustedPace = calculatePaceAdjustment(goalPace, temp, humidity, hydrationStatus, acclimatization);
 
         document.getElementById('result').innerText = `Adjusted Pace: ${adjustedPace}`;
         document.getElementById('weather-info').innerHTML = `
@@ -125,4 +131,3 @@ function applyTheme() {
     document.querySelectorAll('.credits').forEach(credit => credit.style.color = theme.secondary);
     document.querySelectorAll('.credits a').forEach(a => a.style.color = theme.button);
 }
-    
