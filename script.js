@@ -1,5 +1,5 @@
-async function fetchHourlyWeatherData(zipCode) {
-    const response = await fetch(`https://api.weatherapi.com/v1/forecast.json?key=2beb72048c714687af713040240506&q=${zipCode}&days=1&hour=1`);
+async function fetchHourlyWeatherData(location) {
+    const response = await fetch(`https://api.weatherapi.com/v1/forecast.json?key=2beb72048c714687af713040240506&q=${location}&days=1&hour=1`);
     const data = await response.json();
     return data.forecast.forecastday[0].hour;
 }
@@ -26,9 +26,9 @@ function getBaseAdjustment(temp, dewPoint) {
 }
 
 function calculateAcclimatizationScore(hoursPerWeek) {
-    if (hoursPerWeek >= 7) return 0.5; // High acclimatization
-    if (hoursPerWeek >= 4) return 0.75; // Moderate acclimatization
-    return 1; // Low acclimatization
+    if (hoursPerWeek >= 7) return 0.5; 
+    if (hoursPerWeek >= 4) return 0.75;
+    return 1; 
 }
 
 function applyWindAdjustment(adjustment, windSpeed, temp) {
@@ -126,12 +126,12 @@ function calculateHourlyAdjustments(goalPace, hourlyData, acclimatizationHours, 
 
 async function calculateHourlyPaces() {
     const goalPace = document.getElementById('goalPace').value;
-    const zipCode = document.getElementById('zipCode').value;
+    const location = document.getElementById('location').value;
     const acclimatizationHours = parseFloat(document.getElementById('acclimatizationHours').value);
     const hydrationStatus = document.getElementById('hydrationStatus').value;
     const workoutLength = parseInt(document.getElementById('workoutLength').value);
 
-    const hourlyData = await fetchHourlyWeatherData(zipCode);
+    const hourlyData = await fetchHourlyWeatherData(location);
 
     const adjustments = calculateHourlyAdjustments(goalPace, hourlyData, acclimatizationHours, hydrationStatus, workoutLength);
 
@@ -141,9 +141,8 @@ async function calculateHourlyPaces() {
 function renderChart(data) {
     const ctx = document.getElementById('adjustmentChart').getContext('2d');
     const labels = data.map(d => new Date(d.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-    const adjustedPaces = data.map(d => parseFloat(d.adjustedPace.split(':').join('.'))); // Convert "min:sec" to decimal format for chart
+    const adjustedPaces = data.map(d => parseFloat(d.adjustedPace.split(':').join('.'))); 
 
-    // Destroy existing chart instance if it exists
     if (window.adjustmentChart) {
         window.adjustmentChart.destroy();
     }
@@ -205,7 +204,7 @@ function applyTheme() {
     const theme = themes[themeIndex];
     document.body.style.backgroundColor = theme.bg;
     document.body.style.color = theme.fg;
-    document.querySelector('.container').style.backgroundColor = 'white'; /* Always white */
+    document.querySelector('.container').style.backgroundColor = 'white';
     document.querySelector('h1').style.color = theme.secondary;
     document.querySelectorAll('label').forEach(label => label.style.color = theme.secondary);
     document.querySelectorAll('input, select').forEach(input => input.style.backgroundColor = '#EDEDED');
