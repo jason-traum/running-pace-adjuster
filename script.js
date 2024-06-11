@@ -24,32 +24,29 @@ function calculatePaceAdjustment(goalPace, temp, humidity, hydrationLevel, accli
     const dewPoint = calculateDewPoint(temp, humidity);
     const combined = temp + dewPoint;
 
-    // Continuous function for temperature and dew point
-    const baseAdjustment = sigmoid((combined - 100) / 10) * 0.05; // Reduced impact
+    // Base adjustment using a continuous function
+    const baseAdjustment = sigmoid((combined - 110) / 10) * 0.02; // Adjusted base
 
-    // Adjust for hydration level (normalized between 0 and 1)
-    const hydrationAdjustment = sigmoid((100 - hydrationLevel) / 40) * 0.02 // Reduced impact
+    // Hydration adjustment (only if not fully hydrated)
+    const hydrationAdjustment = hydrationLevel < 50 ? sigmoid((50 - hydrationLevel) / 10) * 0.03 : 0; // Reduced impact
 
-    // Adjust for acclimatization (normalized between 0 and 1)
-    const acclimatizationAdjustment = sigmoid(acclimatization / 10) * 0.02; // Reduced impact
-
-    // Adjust for workout length (normalized by subtracting 60 and scaling)
-    const workoutLengthAdjustment = sigmoid((workoutLength - 60) / 10) * 0.02; // Reduced impact
-
-    // Interaction effects
+    // Acclimatization adjustment (scaled by temperature)
     const tempFactor = (temp - 60) / 40;
+    const acclimatizationAdjustment = sigmoid(acclimatization / 10) * 0.02 * (1 + tempFactor); // Reduced impact
+
+    // Workout length adjustment (scaled by temperature)
+    const workoutLengthAdjustment = sigmoid((workoutLength - 60) / 10) * 0.02 * (1 + tempFactor); // Reduced impact
+
+    // Interaction effects for humidity
     const humidityFactor = humidity / 100;
+    const adjustedHydration = hydrationAdjustment * (1 + humidityFactor);
 
-    const adjustedAcclimatization = acclimatizationAdjustment * (1 + tempFactor);
-    const adjustedHydration = hydrationAdjustment * (1 + tempFactor + humidityFactor);
-    const adjustedWorkoutLength = workoutLengthAdjustment * (1 + tempFactor);
-
-    let adjustment = baseAdjustment + adjustedHydration - adjustedAcclimatization + adjustedWorkoutLength;
+    let adjustment = baseAdjustment + adjustedHydration - acclimatizationAdjustment + workoutLengthAdjustment;
 
     console.log(`Base Adjustment: ${baseAdjustment}`);
     console.log(`Hydration Adjustment: ${adjustedHydration}`);
-    console.log(`Acclimatization Adjustment: ${adjustedAcclimatization}`);
-    console.log(`Workout Length Adjustment: ${adjustedWorkoutLength}`);
+    console.log(`Acclimatization Adjustment: ${acclimatizationAdjustment}`);
+    console.log(`Workout Length Adjustment: ${workoutLengthAdjustment}`);
     console.log(`Total Adjustment: ${adjustment}`);
 
     // Split goal pace into minutes and seconds
@@ -70,8 +67,8 @@ function calculatePaceAdjustment(goalPace, temp, humidity, hydrationLevel, accli
         details: {
             baseAdjustment,
             adjustedHydration,
-            adjustedAcclimatization,
-            adjustedWorkoutLength,
+            acclimatizationAdjustment,
+            workoutLengthAdjustment,
             totalAdjustment: adjustment
         }
     };
@@ -103,8 +100,8 @@ async function calculateAdjustedPace() {
             <p><strong>Adjustment Details:</strong></p>
             <p>Base Adjustment: ${(details.baseAdjustment * 100).toFixed(2)}%</p>
             <p>Hydration Adjustment: ${(details.adjustedHydration * 100).toFixed(2)}%</p>
-            <p>Acclimatization Adjustment: ${(details.adjustedAcclimatization * 100).toFixed(2)}%</p>
-            <p>Workout Length Adjustment: ${(details.adjustedWorkoutLength * 100).toFixed(2)}%</p>
+            <p>Acclimatization Adjustment: ${(details.acclimatizationAdjustment * 100).toFixed(2)}%</p>
+            <p>Workout Length Adjustment: ${(details.workoutLengthAdjustment * 100).toFixed(2)}%</p>
             <p>Total Adjustment: ${(details.totalAdjustment * 100).toFixed(2)}%</p>
         `;
         // Show the results and details
